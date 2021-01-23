@@ -9,3 +9,9 @@ Tips: 可试用 Visual Studio Code 编辑器进行代码编写查阅，搭配 Li
 * [书籍网站及其官方源码](https://sites.google.com/site/webglbook/)
 * **手写代码，相比于书籍源代码，结合了自己的理解和写代码的习惯**
 ***
+
+## 目录
+### Chapter 1 - 简介
+### Chapter 2 - WebGL 入门
+* [2-1](./02/2-1.js) - 用 canvas API 绘制图案
+* [2-2](./02/2-2.js) - 用 webgl API 绘制图案
