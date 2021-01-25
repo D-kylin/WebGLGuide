@@ -15,3 +15,6 @@ Tips: 可试用 Visual Studio Code 编辑器进行代码编写查阅，搭配 Li
 ### Chapter 2 - WebGL 入门
 * [2-1](./02/2-1.js) - 用 canvas API 绘制图案
 * [2-2](./02/2-2.js) - 用 webgl API 绘制图案
+* [2-3](./02/2-3.js) - 用 webgl API 绘制一个点
+  * [2-3-1](./02/2-3-1.js) - 使用 GLSL ES 的 attribute 变量
+* [2-4](./02/2-4.js) - 添加事件联动
