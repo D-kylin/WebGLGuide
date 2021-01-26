@@ -24,10 +24,11 @@ ready(() => {
     const a_Position = gl.getAttribLocation(gl.program, 'a_Position')
     const a_PointSize = gl.getAttribLocation(gl.program, 'a_PointSize')
 
-    gl.vertexAttrib1f(a_PointSize, 15.0)
+    gl.vertexAttrib1f(a_PointSize, 10.0)
     
     // 在 canvas 上注册鼠标点击事件
     canvas.onmousedown = function(e) {
+      console.log(e)
       click(e, gl, canvas, a_Position)
     }
 
@@ -42,8 +43,14 @@ ready(() => {
     let y = event.clientY
     const rect = event.target.getBoundingClientRect()
 
-    x = ((x - rect.left) - canvas.height / 2) / (canvas.height / 2)
-    y = (canvas.width / 2 - (y - rect.top)) / (canvas.width / 2)
+    /**
+     * 注意：这里的x、y值计算与书本有差异，经过实践，发现是书本印刷有误
+     * 
+     * x = ((x - rect.left) - canvas.height / 2) / (canvas.height / 2)
+     * y = (canvas.width / 2 - (y - rect.top)) / (canvas.width / 2)
+     */
+    x = ((x - rect.left) - canvas.width / 2) / (canvas.width / 2)
+    y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2)
 
     // 添加点坐标
     g_points.push([x, y])
