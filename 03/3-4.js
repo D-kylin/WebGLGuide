@@ -1,11 +1,9 @@
 ready(() => {
   const VSHADER_SOURCE = `
     attribute vec4 a_Position;
-    attribute float a_PointSize;
-
+    uniform vec4 u_Translation;
     void main() {
-      gl_Position = a_Position;
-      gl_PointSize = a_PointSize;
+      gl_Position = a_Position + u_Translation;
     }
   `
   const FSHADER_SOURCE = `
@@ -15,6 +13,8 @@ ready(() => {
       gl_FragColor = u_FragColor;
     }
   `
+  
+  const Tx = 0.5; const Ty = 0.5; const Tz = 0.0
 
   function main() {
     const canvas = document.getElementById('webgl')
@@ -26,28 +26,25 @@ ready(() => {
     // 设置顶点位置
     const n = initVertexBuffers(gl)
     
-    const a_PointSize = gl.getAttribLocation(gl.program, 'a_PointSize')
     const u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor')
-
-    gl.vertexAttrib1f(a_PointSize, 10.0)
+    const u_Translation = gl.getUniformLocation(gl.program, 'u_Translation')
     gl.uniform4f(u_FragColor, 1.0, 0.0, 0.0, 1.0)
+    gl.uniform4f(u_Translation, Tx, Ty, Tz, 0.0)
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
-    gl.drawArrays(gl.POINTS, 0, n)
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, n)
   }
 
   function initVertexBuffers(gl) {
-    // vertices 每两个组成一个点坐标
+    // vertices 每两个数值组成一个点坐标
     const vertices = new Float32Array([
       0.0, 0.5, 
       -0.5, -0.5, 
       0.5, -0.5,
-      0.25, 0.25,
-      0.75, 0.75
     ])
-    const n = 5
+    const n = 3
 
     // 创建缓冲区对象
     const vertexBuffer = gl.createBuffer()
