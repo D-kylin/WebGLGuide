@@ -3,8 +3,9 @@ ready(() => {
     attribute vec4 a_Position;
     attribute vec4 a_Color;
     varying vec4 v_Color;
+    uniform mat4 u_ModelMatrix;
     void main() {
-      gl_Position = a_Position;
+      gl_Position = u_ModelMatrix * a_Position;
       gl_PointSize = 10.0;
       v_Color = a_Color;
     }
@@ -17,6 +18,8 @@ ready(() => {
     }
   `
 
+  const ANGLE_STEP = 45.0
+
   function main() {
     const canvas = document.getElementById('webgl')
     const gl = getWebGLContext(canvas)
@@ -26,14 +29,21 @@ ready(() => {
 
     // 设置顶点位置
     const n = initVertexBuffers(gl)
-    
-    const u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor')
-    gl.uniform4f(u_FragColor, 1.0, 0.0, 0.0, 1.0)
-
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
-    gl.clear(gl.COLOR_BUFFER_BIT)
 
-    gl.drawArrays(gl.TRIANGLES, 0, n)
+    // 为旋转矩阵创建Matrix4对象
+    const modelMatrix = new Matrix4()
+    let currentAngle = 0.0
+    const u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix')
+
+    const tick = function() {
+      currentAngle = animate(currentAngle)
+      draw(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
+      requestAnimationFrame(tick)
+    }
+
+    tick()
+
   }
 
   function initVertexBuffers(gl) {
@@ -66,6 +76,26 @@ ready(() => {
     gl.enableVertexAttribArray(a_Color)
 
     return n
+  }
+
+  function draw(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
+    // 改变转角
+    modelMatrix.setRotate(currentAngle, 0, 0, 1)
+    // 将旋转矩阵传入顶点着色器
+    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements)
+
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, n)
+  }
+
+  let g_last = Date.now()
+  function animate(angle) {
+    const now = Date.now()
+    const elapsed = now - g_last
+    g_last = now
+
+    let newAngle = angle + (ANGLE_STEP * elapsed) / 1000.0
+    return newAngle %= 360
   }
 
 
