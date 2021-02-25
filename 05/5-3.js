@@ -9,6 +9,7 @@ ready(() => {
     }
   `
   const FSHADER_SOURCE = `
+    precision mediump float;
     uniform sampler2D u_Sampler;
     varying vec2 v_TexCoord;
     void main() {
@@ -25,8 +26,12 @@ ready(() => {
 
     // 设置顶点位置
     const n = initVertexBuffers(gl)
-    gl.clearColor(0.0, 0.0, 0.0, 1.0)
-    initTextures(gl, n)
+    gl.clearColor(0.0, 0.0, 0.0, .1)
+    
+    loadImg('../assets/transformationMatrix.jpg')
+      .then(img => {
+        loadTexture(gl, n, img)
+      })
 
   }
 
@@ -38,52 +43,51 @@ ready(() => {
       0.5, -0.5, 1.0, 0.0,
     ])
     const n = 4
+    const FSIZE = verticesTexCoords.BYTES_PER_ELEMENT
 
     // 创建缓冲区对象
     const vertexTexCoordBuffer = gl.createBuffer()
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexCoordBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW)
-    const FSIZE = verticesTexCoords.BYTES_PER_ELEMENT
-    // 将缓存区对象分配给一个 attribute 变量
+
     const a_Position = gl.getAttribLocation(gl.program, 'a_Position')
+    const a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord')
     gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, FSIZE * 4, 0)
+    gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, FSIZE * 4, FSIZE * 2)
+    
     // 开启缓冲区
     gl.enableVertexAttribArray(a_Position)
-
-    const a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord')
-    gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, FSIZE * 4, FSIZE * 2)
-    // 开启缓冲区
     gl.enableVertexAttribArray(a_TexCoord)
 
     return n
   }
 
-
-  function initTextures(gl, n) {
-    const texture = gl.createTexture()
-
-    const u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler')
+  function loadImg(url) {
     const image = new Image()
 
-    image.onload = function() {
-      loadTexture(gl, n, texture, u_Sampler, image)
-    }
-    image.src = '../resources/sky.jpg'
-    return true
-
+    return new Promise((resolve, reject) => {
+      image.src = url
+      image.onload = () => resolve(image)
+      image.onerror = (err) => reject(err)
+    })
   }
 
-  function loadTexture(gl, n, texture, u_Sampler, image) {
+  function loadTexture(gl, n, image) {
+    const texture = gl.createTexture()
+    const u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler')
+    
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
+    
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, texture)
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXT_MIN_FILTER, gl.LINEAR)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image)
-
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
+    
     gl.uniform1i(u_Sampler, 0)
-    gl.drawArrays(gl.TRANGLE_STRIP, 0, n)
+
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, n)
   }
 
   main()
